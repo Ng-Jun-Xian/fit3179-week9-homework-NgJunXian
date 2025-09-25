@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global GDP Per Capita Map</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      text-align: center;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #vis {
+      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+    }
+    .description {
+      max-width: 900px;
+      margin: 30px auto 0;
+      padding: 25px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Global GDP Per Capita by Country (2019)</h2>
+  <div class="subtitle">
+    This map displays GDP per capita data from the World Bank for 2019. 
+    <strong>Colored countries</strong> represent nations with publicly available GDP data, 
+    while <strong style="color: #888;">grey countries</strong> indicate territories or nations 
+    where GDP data is not publicly available or reported.
+  </div>
+  <div id="vis"></div>
+</div>
+
+<script type="text/javascript">
+  const spec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 900,
+    "height": 500,
+    "title": {
+      "text": "GDP Per Capita by Country (USD)",
+      "subtitle": "Gross Domestic Product per capita in current USD (2019) • Grey countries: No publicly available GDP data",
+      "fontSize": 18,
+      "anchor": "start"
+    },
+    "projection": {
+      "type": "equirectangular"
+    },
+    "layer": [
+      {
+        "data": {
+          "url": "ne_10m_admin_0_countries.json",
+          "format": {
+            "type": "topojson",
+            "feature": "world_countries"
+          }
+        },
+        "mark": {
+          "type": "geoshape",
+          "fill": "#e0e0e0",
+          "stroke": "white",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "data": {
+          "url": "ne_10m_admin_0_countries.json",
+          "format": {
+            "type": "topojson",
+            "feature": "world_countries"
+          }
+        },
+        "transform": [
+          {
+            "lookup": "properties.NAME",
+            "from": {
+              "data": {
+                "url": "gdp_cleaned.csv"
+              },
+              "key": "Country Name",
+              "fields": ["2019", "Country Code"]
+            }
+          }
+        ],
+        "mark": {
+          "type": "geoshape",
+          "stroke": "white",
+          "strokeWidth": 0.5
+        },
+        "encoding": {
+          "color": {
+            "field": "2019",
+            "type": "quantitative",
+            "scale": {
+              "scheme": "viridis"
+            },
+            "legend": {
+              "title": "GDP per capita (USD)"
+            }
+          },
+          "tooltip": [
+            {"field": "properties.NAME", "type": "nominal", "title": "Country"},
+            {"field": "2019", "type": "quantitative", "format": ",.0f", "title": "GDP per capita (2019, USD)"},
+            {"field": "Country Code", "type": "nominal", "title": "Country Code"}
+          ]
+        }
+      }
+    ],
+    "config": {
+      "background": "#f0f8ff",
+      "view": {"stroke": "transparent"}
+    }
+  };
+
+  vegaEmbed('#vis', spec);
+</script>
+
+<div class="description">
+  <h3 style="color: #333; margin-bottom: 15px; text-align: center;">About This Map</h3>
+  
+  <p style="margin-bottom: 15px; line-height: 1.6; color: #555;">
+    This choropleth map visualizes <strong>Gross Domestic Product (GDP) per capita</strong> across countries worldwide for the year 2019. 
+    GDP per capita represents the total economic output of a country divided by its population, providing an indicator of 
+    average economic prosperity and living standards.
+  </p>
+  
+  <h4 style="color: #333; margin-bottom: 10px;">What This Map Conveys:</h4>
+  <ul style="margin-bottom: 15px; line-height: 1.6; color: #555;">
+    <li><strong>Economic Development Patterns:</strong> Darker colors (higher values) typically represent developed nations with stronger economies, while lighter colors show developing economies.</li>
+    <li><strong>Global Economic Inequality:</strong> The stark contrast between regions reveals significant disparities in wealth and economic development across the globe.</li>
+    <li><strong>Regional Clustering:</strong> Wealthy nations often cluster geographically (e.g., Western Europe, North America), while lower-income regions form distinct patterns (e.g., Sub-Saharan Africa, parts of Asia).</li>
+    <li><strong>Resource and Geographic Influence:</strong> Some smaller nations with high GDP per capita may reflect oil wealth, financial centers, or strategic geographic advantages.</li>
+  </ul>
+  
+  <p style="margin-bottom: 0; line-height: 1.6; color: #555; font-size: 14px;">
+    <strong>Data Source:</strong> World Bank GDP per capita data (current USD, 2019). 
+    Hover over countries to see exact values. Grey areas indicate countries where GDP data is not publicly available.
+  </p>
+</div>
+
+</body>
+</html>
