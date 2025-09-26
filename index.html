@@ -53,122 +53,78 @@
 </head>
 <body>
 
-<div class="container">
-  <h2>Global GDP Per Capita by Country (2019)</h2>
-  <div class="subtitle">
-    This map displays GDP per capita data from the World Bank for 2019. 
-    <strong>Colored countries</strong> represent nations with publicly available GDP data, 
-    while <strong style="color: #888;">grey countries</strong> indicate territories or nations 
-    where GDP data is not publicly available or reported.
-  </div>
-  <div id="vis"></div>
-</div>
+  <div class="container">
+    <h1>How Coffee Affects the World?</h1>
+    
+    <div id="vis"></div>
 
 <script type="text/javascript">
   const spec = {
-    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-    "width": 900,
-    "height": 500,
-    "title": {
-      "text": "GDP Per Capita by Country (USD)",
-      "subtitle": "Gross Domestic Product per capita in current USD (2019) • Grey countries: No publicly available GDP data",
-      "fontSize": 18,
-      "anchor": "start"
-    },
-    "projection": {
-      "type": "equirectangular"
-    },
-    "layer": [
-      {
-        "data": {
-          "url": "ne_10m_admin_0_countries.json",
-          "format": {
-            "type": "topojson",
-            "feature": "world_countries"
-          }
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "width": 800,
+        "height": 500,
+        "title": {
+          "text": "GDP Per Capita by Country",
+          "subtitle": "Gross Domestic Product per capita in current USD (2019) - Grey countries: No publicly available GDP data",
+          "fontSize": 16,
+          "anchor": "start",
+          "color": "#333"
         },
-        "mark": {
-          "type": "geoshape",
-          "fill": "#e0e0e0",
-          "stroke": "white",
-          "strokeWidth": 0.5
-        }
-      },
-      {
-        "data": {
-          "url": "ne_10m_admin_0_countries.json",
-          "format": {
-            "type": "topojson",
-            "feature": "world_countries"
-          }
-        },
-        "transform": [
+        "projection": {"type": "equalEarth"},
+        "layer": [
           {
-            "lookup": "properties.NAME",
-            "from": {
-              "data": {
-                "url": "gdp_cleaned.csv"
+            "data": {"sphere": true},
+            "mark": {"type": "geoshape", "fill": "lightblue", "stroke": "steelblue", "strokeWidth": 1}
+          },
+          {
+            "data": {"graticule": {"step": [30, 30]}},
+            "mark": {"type": "geoshape", "fill": null, "stroke": "white", "strokeWidth": 0.3, "strokeOpacity": 0.5}
+          },
+          {
+            "data": {
+              "url": "ne_10m_admin_0_countries.json",
+              "format": {"type": "topojson", "feature": "world_countries"}
+            },
+            "mark": {"type": "geoshape", "fill": "#ddd", "stroke": "white", "strokeWidth": 0.5}
+          },
+          {
+            "data": {
+              "url": "ne_10m_admin_0_countries.json",
+              "format": {"type": "topojson", "feature": "world_countries"}
+            },
+            "transform": [
+              {
+                "lookup": "properties.NAME",
+                "from": {
+                  "data": {"url": "gdp_cleaned.csv"},
+                  "key": "Country Name",
+                  "fields": ["2019"]
+                }
               },
-              "key": "Country Name",
-              "fields": ["2019", "Country Code"]
+              {"filter": "datum['2019'] != null"}
+            ],
+            "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 0.5},
+            "encoding": {
+              "color": {
+                "field": "2019",
+                "type": "quantitative",
+                "scale": {
+                  "scheme": "orangered",
+                  "type": "log"
+                },
+                "legend": {"title": "GDP per capita (USD)"}
+              },
+              "tooltip": [
+                {"field": "properties.NAME", "type": "nominal", "title": "Country"},
+                {"field": "2019", "type": "quantitative", "title": "GDP per capita (USD)", "format": "$,.0f"}
+              ]
             }
           }
-        ],
-        "mark": {
-          "type": "geoshape",
-          "stroke": "white",
-          "strokeWidth": 0.5
-        },
-        "encoding": {
-          "color": {
-            "field": "2019",
-            "type": "quantitative",
-            "scale": {
-              "scheme": "viridis"
-            },
-            "legend": {
-              "title": "GDP per capita (USD)"
-            }
-          },
-          "tooltip": [
-            {"field": "properties.NAME", "type": "nominal", "title": "Country"},
-            {"field": "2019", "type": "quantitative", "format": ",.0f", "title": "GDP per capita (2019, USD)"},
-            {"field": "Country Code", "type": "nominal", "title": "Country Code"}
-          ]
-        }
-      }
-    ],
-    "config": {
-      "background": "#f0f8ff",
-      "view": {"stroke": "transparent"}
-    }
-  };
+        ]
+      };
 
   vegaEmbed('#vis', spec);
 </script>
-
-<div class="description">
-  <h3 style="color: #333; margin-bottom: 15px; text-align: center;">About This Map</h3>
-  
-  <p style="margin-bottom: 15px; line-height: 1.6; color: #555;">
-    This choropleth map visualizes <strong>Gross Domestic Product (GDP) per capita</strong> across countries worldwide for the year 2019. 
-    GDP per capita represents the total economic output of a country divided by its population, providing an indicator of 
-    average economic prosperity and living standards.
-  </p>
-  
-  <h4 style="color: #333; margin-bottom: 10px;">What This Map Conveys:</h4>
-  <ul style="margin-bottom: 15px; line-height: 1.6; color: #555;">
-    <li><strong>Economic Development Patterns:</strong> Darker colors (higher values) typically represent developed nations with stronger economies, while lighter colors show developing economies.</li>
-    <li><strong>Global Economic Inequality:</strong> The stark contrast between regions reveals significant disparities in wealth and economic development across the globe.</li>
-    <li><strong>Regional Clustering:</strong> Wealthy nations often cluster geographically (e.g., Western Europe, North America), while lower-income regions form distinct patterns (e.g., Sub-Saharan Africa, parts of Asia).</li>
-    <li><strong>Resource and Geographic Influence:</strong> Some smaller nations with high GDP per capita may reflect oil wealth, financial centers, or strategic geographic advantages.</li>
-  </ul>
-  
-  <p style="margin-bottom: 0; line-height: 1.6; color: #555; font-size: 14px;">
-    <strong>Data Source:</strong> World Bank GDP per capita data (current USD, 2019). 
-    Hover over countries to see exact values. Grey areas indicate countries where GDP data is not publicly available.
-  </p>
-</div>
 
 </body>
 </html>
